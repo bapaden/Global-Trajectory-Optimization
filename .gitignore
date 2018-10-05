@@ -33,3 +33,5 @@
 
 *.kdev4
 build/
+html/
+latex/
