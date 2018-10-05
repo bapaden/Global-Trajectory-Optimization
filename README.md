@@ -1,8 +1,15 @@
 # Global Trajectory Optimization via the Generalized Label Correcting Method
 
+
 Explain what the lib does and point to reference
 
-## Compiling and Installation
+### Documentation
+
+Doxygen generated documentation is hosted here:
+
+[https://codedocs.xyz/bapaden/Global-Trajectory-Optimization/md_README.html](https://codedocs.xyz/bapaden/Global-Trajectory-Optimization/md_README.html)
+
+### Compiling and Installation
 
 To install the library, enter the following terminal commands from the top level directory
 
@@ -22,3 +29,7 @@ sudo apt-get install libgtest-dev
 ```
 
 [https://github.com/google/googletest](https://github.com/google/googletest)
+
+### Running the examples
+
+### API 
