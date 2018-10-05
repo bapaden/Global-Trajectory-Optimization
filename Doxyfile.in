@@ -552,9 +552,8 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
 
-INPUT                  = ./src/glc \
-                         ./include/glc \
-                         ./examples \
+INPUT                  = ./glc/src \
+                         ./glc/include \
                           README.md
 USE_MDFILE_AS_MAINPAGE = README.md
 
