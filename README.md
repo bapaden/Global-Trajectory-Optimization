@@ -33,3 +33,15 @@ sudo apt-get install libgtest-dev
 ### Running the examples
 
 ### API 
+
+Using Cmake, you can link to the installed library as follows:
+
+```
+...
+find_package(glc)
+include_directories(${GLC_INCLUDE_DIRS})
+
+add_executable(your_awesome_planning_algorithm your_src.cpp)
+target_link_libraries(your_awesome_planning_algorithm glc_planner_core)
+...
+```
