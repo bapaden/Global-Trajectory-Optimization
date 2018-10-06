@@ -18,29 +18,7 @@ double CostFunction::getLipschitzConstant(){
   return lipschitz_constant;
 }
 
-DynamicalSystem::DynamicalSystem(double _max_time_step):max_time_step(_max_time_step){}
+DynamicalSystem::DynamicalSystem(double lipschitz_constant_):lipschitz_constant(lipschitz_constant_){}
 
-void DynamicalSystem::sim(std::shared_ptr<InterpolatingPolynomial>& solution, double t0, double tf, const std::valarray<double>& x0, const std::shared_ptr<InterpolatingPolynomial>& u){
-  assert(tf>t0);
-  double num_steps=ceil((tf-t0)/max_time_step);
-  double integration_step=(tf-t0)/num_steps;
-  solution = std::shared_ptr<InterpolatingPolynomial>(new InterpolatingPolynomial(integration_step,t0,x0.size(),4));
-  solution->reserve(num_steps);
-  //set initial state and time
-  std::valarray<double> state=x0;
-  double time=t0;
-  std::shared_ptr<InterpolatingPolynomial> traj_segment;
-  //integrate
-  for(int i=0;i<num_steps;i++){
-    //Use numerical integration scheme to compute a spline extending from state with input u([t,t+integration_step])
-    step(traj_segment,state,u,time,time+integration_step);
-    //add traj_segment to solution
-    solution->concatenate(traj_segment);
-    time+=integration_step;
-    state=traj_segment->at(time);
-  }
-  sim_counter++;
-  return;
-}
 
 }
