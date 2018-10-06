@@ -1,4 +1,4 @@
-/* Copyright (C) Brian Paden (bapaden@mit.edu) - All Rights Reserved
+/* Copyright (C) Brian Paden (bapaden@mit.edu)
  * Written by Brian Paden
  * Released under the GNU General Public License v3
  */
@@ -36,13 +36,21 @@ namespace glc{
   class Planner{
     
   public:
+    //! \brief A leaf node in the goal region with minimum cost from the root
     std::shared_ptr<Node> best;
+    //! \brief The root of the search tree
     std::shared_ptr<Node> root_ptr;
+    //! \brief A raw pointer to the dynamical system for the problem
     DynamicalSystem* dynamics;
+    //! \brief A raw pointer to the goal region for the problem
     GoalRegion* goal;
+    //! \brief A raw pointer to the (topologically)closed obstacle set for the problem
     Obstacles* obs;
+    //! \brief A raw pointer to the cost function for the problem
     CostFunction* cf;
+    //! \brief A raw pointer to the heuristic for the problem
     Heuristic* h;
+    //! \brief A comparator for measureing relative merit of nodes
     NodeMeritOrder compare;
     std::priority_queue<std::shared_ptr<Node>,std::vector<std::shared_ptr<Node>>,NodeMeritOrder> queue;
     std::set<StateEquivalenceClass> domain_labels;

@@ -88,25 +88,41 @@ public:
   /**
    * \brief Extends this curve by copying the contents of tail to the back of this curve
    * 
-   * Tha value of t0 in tail is ignored
+   * The value of t0 in tail is ignored
    */
   void concatenate(const std::shared_ptr<InterpolatingPolynomial>& tail);
-  //Push a single collocation point into the spline
-  void push(const std::vector< std::valarray<double> >& knot);
+  /**
+   * \brief appends a single polynomial segment to the back of this spline
+   */ 
+  void push(const std::vector< std::valarray<double> >& segment);
   
-  //Evaluate spline at time t
+  /**
+   * \brief Evaluate the curve at parameter value t
+   * 
+   * This method first identifies which interval I should
+   * be evaluated. From there an offset equal to t-I*collocation_interval
+   * is computed and this value is passed to the monomial basis on the 
+   * inner array indices of coefficient_array.
+   */
   std::valarray<double> at(const double& t);
   
-  // Allocates memory in coefficient_array for "size" collocation points
+  //! \brief Allocates memory in coefficient_array for "size" spline intervals
   void reserve(const int& size);
   
+  //! \brief returns a copy of the number of intervals in this interpolating spline
   int numberOfIntervals();
   
+  //! \brief returns the length of each interval -- each interval has equal length
   double intervalLength();
   
+  //! \brief returns the initial time for the parametric curve
   double initialTime();
   
-  //Write trajectory out on the screen
+  /** 
+   * \brief prints uniformly sampled points along the curve to the terminal
+   * \param[in] num_points 
+   * \param[in] msg is a message that will accompany the output to the terminal
+   */
   void printSpline(int num_points, const std::string& msg);
 };
 
