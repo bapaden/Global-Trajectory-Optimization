@@ -19,32 +19,47 @@ namespace glc{
 
 /**
  * \brief Computes the square of a floating point number
- * \param x a double that is squared
+ * \param x_ a double that is squared
  * \return The square of x
  */  
-double sqr(const double x);
+double sqr(const double x_);
 
 /**
- * \brief Calculates the square of the L2-norm of a vector.
- * \param x is the input vector whose norm will be squared.
+ * \brief Calculates the square of the L2-norm of a vector; more efficient than sqr(norm2(x))
+ * \param x_ is the input vector whose norm be computed and squared.
  * \returns The square of the norm of the parameter x.
  */
-double normSqr(const std::valarray<double>& x);
+double normSqr(const std::valarray<double>& x_);
 
 /**
- * \brief Calculates the square of the L2-norm of a vector.
- * \param x is the input vector whose norm will be squared
- * \param y is set to the square of the norm of the parameter x.
+ * \brief Element-wise floor operation
+ * \param x_ is the input vector whose entries will be rounded down
  */
-std::vector<int> vecFloor(const std::valarray<double>& x);
+std::vector<int> vecFloor(const std::valarray<double>& x_);
 
-double dot(const std::valarray<double>& x,const std::valarray<double>& y);
+/**
+ * \brief The dot product of two vectors x and y
+ * \param[in] x_ is one of the vectors in the product
+ * \param[in] y_ the other vector in the product
+ * \returns The dot product obtained by x'y
+ */
+double dot(const std::valarray<double>& x_,const std::valarray<double>& y_);
 
-double norm2(const std::valarray<double>& x);
+/**
+ * \brief This method computes the l2 norm of a vector x
+ * \param[in] x_ is the vector whose norm will be computed
+ * \returns The return value is the l2 norm of the parameter x
+ */
+double norm2(const std::valarray<double>& x_);
 
-// double normSqr(const std::valarray<double>& x);
-
-std::valarray<double> linearSpace(const double& start, const double& end, const int points);
+/**
+ * \brief This method computes uniformly spaced points on an interval
+ * \param[in] start_ is the lower bound of the interval
+ * \param[in] end_ is the upper bound of the interval
+ * \param[in] num_points_ is the number of points uniformly spaced on [start_,end_)
+ * \returns An array of points with length num_points_ starting at start_ and ending at end_ the rightmost boundary is not included.
+ */
+std::valarray<double> linearSpace(const double& start_, const double& end_, const int num_points_);
 
 }//namespace glc
 #endif
