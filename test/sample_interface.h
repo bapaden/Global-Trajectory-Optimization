@@ -83,9 +83,9 @@ public:
 ////////////////////////////////////////////////////////
 class SingleIntegrator : public glc::RungeKuttaTwo{
 public:
-  SingleIntegrator(const double& _max_time_step): glc::RungeKuttaTwo(_max_time_step,2) {}
+  SingleIntegrator(const double& max_time_step_): glc::RungeKuttaTwo(0.0,max_time_step_,2) {}
   void flow(std::valarray<double>& dx, const std::valarray<double>& x, const std::valarray<double>& u) override {dx=u;}
-  double getLipschitzConstant(){return 0.0;}//TODO override for DynamicSystem
+  double getLipschitzConstant(){return 0.0;}
 };
 
 ////////////////////////////////////////////////////////
