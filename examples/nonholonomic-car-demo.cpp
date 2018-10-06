@@ -1,35 +1,101 @@
-/* Copyright (C) Brian Paden (bapaden@mit.edu)
- * Written by Brian Paden
- * Distributed under the GPLv3 license
- */
 
-/* This example illustrates how to interface with the glc planner.
- * One must provide:
- * 
- * 1) A finite subset of admissible control inputs
- * parameterized by a resolution so that this finite
- * so that this finite set converges to a dense subset. 
- * 
- * 2) A goal checking subroutine that determines
- * if a trajectory opject intersects the goal set.
- * 
- * 3) An admissible heuristic that underestimates 
- * the optimal cost-to-go from every feasible state.
- * 
- * 4) A dynamic model describing the response of the 
- * system to control inputs and also a lipschitz 
- * constant for the model.
- * 
- * 5) A feasibility or collision checking function.
- * 
- * 6) A cost functional for candidate trajectories.
- */
 
 #include <glc_planner_core.h>
 
 ////////////////////////////////////////////////////////
 /////////Discretization of Control Inputs///////////////
 ////////////////////////////////////////////////////////
+class ControlInputs2D : public glc::Inputs{
+  
+public:
+  //uniformly spaced points on a circle
+  ControlInputs2D(int num_inputs){
+    std::valarray<double> u(2);
+    for(int i=0;i<num_inputs;i++){
+      u[0]=sin(2.0*i*M_PI/num_inputs);
+      u[1]=cos(2.0*i*M_PI/num_inputs);
+      addInputSample(u);
+    }
+  }
+};
+
+////////////////////////////////////////////////////////
+///////////////Goal Checking Interface//////////////////
+////////////////////////////////////////////////////////
+class SphericalGoal: public glc::GoalRegion{
+  double goal_radius, goal_radius_sqr;
+  std::valarray<double> error;
+  std::valarray<double> x_g;
+  int resolution;
+public:
+  SphericalGoal(const int& _state_dim, 
+                const double& _goal_radius,
+                int _resolution):
+                x_g(_state_dim,0.0), 
+                resolution(_resolution),
+                goal_radius(_goal_radius),
+                error(_state_dim,0.0)
+                {
+                  goal_radius_sqr=glc::sqr(goal_radius);
+                }
+                //Returns true if traj intersects goal and sets t to the first time at which the trajectory is in the goal
+                bool inGoal(const std::shared_ptr<glc::InterpolatingPolynomial>& traj, double& time) override {
+                  time=traj->initialTime();
+                  
+                  double dt=(traj->numberOfIntervals()*traj->intervalLength())/resolution;
+                  for(int i=0;i<resolution;i++){
+                    time+=dt;//don't need to check t0 since it was part of last traj
+                    error=x_g-traj->at(time);
+                    if(glc::dot(error,error) < goal_radius_sqr){
+                      return true;}
+                  }
+                  return false;
+                }
+                
+                void setRadius(double r){
+                  goal_radius = r;
+                  goal_radius_sqr = r*r;
+                }
+                double getRadius(){return goal_radius;}
+                void setGoal(std::valarray<double>& _x_g){x_g=_x_g;}
+                std::valarray<double> getGoal(){return x_g;}
+};
+
+////////////////////////////////////////////////////////
+/////////////////Dynamic Model//////////////////////////
+////////////////////////////////////////////////////////
+class SingleIntegrator : public glc::RungeKuttaTwo{
+public:
+  SingleIntegrator(const double& max_time_step_): glc::RungeKuttaTwo(0.0,max_time_step_,2) {}
+  void flow(std::valarray<double>& dx, const std::valarray<double>& x, const std::valarray<double>& u) override {dx=u;}
+  double getLipschitzConstant(){return 0.0;}
+};
+
+////////////////////////////////////////////////////////
+/////////////////Cost Function//////////////////////////
+////////////////////////////////////////////////////////
+class ArcLength: public glc::CostFunction 
+{
+  double sample_resolution;
+public:
+  ArcLength(int _sample_resolution) : glc::CostFunction(0.0),sample_resolution(double(_sample_resolution)){}
+  
+  double cost(const std::shared_ptr<glc::InterpolatingPolynomial>& traj, 
+              const std::shared_ptr<glc::InterpolatingPolynomial>& control, 
+              double t0, 
+              double tf) const {
+                double c(0);
+                double t = traj->initialTime();
+                double dt = (tf-t0)/sample_resolution;
+                for(int i=0;i<sample_resolution;i++){
+                  c+=glc::norm2(traj->at(t+dt)-traj->at(t));
+                  t+=dt;
+                }
+                return c;
+              }
+};
+
+
 class CarControlInputs: public glc::Inputs{
 public:
   //uniformly spaced points on a circle
@@ -62,19 +128,19 @@ public:
                 resolution(_resolution),
                 center(_goal_center),
                 radius_sqr(_goal_radius_sqr){}
-
-  //Returns true if traj intersects goal and sets t to the first time at which the trajectory is in the goal
-  bool inGoal(const std::shared_ptr<glc::InterpolatingPolynomial>& traj, double& time) override {
-    time=traj->initialTime();
-    
-    double dt=(traj->numberOfIntervals()*traj->intervalLength())/resolution;
-    for(int i=0;i<resolution;i++){
-      time+=dt;//don't need to check t0 since it was part of last traj
-      std::valarray<double> state = traj->at(time);
-        if(glc::sqr(state[0]-center[0]) + glc::sqr(state[1]-center[1]) < radius_sqr){return true;}
-    }
-    return false;
-  }
+                
+                //Returns true if traj intersects goal and sets t to the first time at which the trajectory is in the goal
+                bool inGoal(const std::shared_ptr<glc::InterpolatingPolynomial>& traj, double& time) override {
+                  time=traj->initialTime();
+                  
+                  double dt=(traj->numberOfIntervals()*traj->intervalLength())/resolution;
+                  for(int i=0;i<resolution;i++){
+                    time+=dt;//don't need to check t0 since it was part of last traj
+                    std::valarray<double> state = traj->at(time);
+                    if(glc::sqr(state[0]-center[0]) + glc::sqr(state[1]-center[1]) < radius_sqr){return true;}
+                  }
+                  return false;
+                }
 };
 
 ////////////////////////////////////////////////////////
@@ -105,20 +171,6 @@ public:
 };
 
 ////////////////////////////////////////////////////////
-/////////////////Cost Function//////////////////////////
-////////////////////////////////////////////////////////
-class ArcLength: public glc::CostFunction 
-{
-  double sample_resolution;
-public:
-  ArcLength(int _sample_resolution) : glc::CostFunction(0.0),sample_resolution(double(_sample_resolution)){}
-  
-  double cost(const std::shared_ptr<glc::InterpolatingPolynomial>& traj, const std::shared_ptr<glc::InterpolatingPolynomial>& control, double t0, double tf) const{
-    return traj->numberOfIntervals()*traj->intervalLength();
-  }
-};
-
-////////////////////////////////////////////////////////
 /////////////////State Constraints//////////////////////
 ////////////////////////////////////////////////////////
 class PlanarDemoObstacles: public glc::Obstacles{
@@ -137,9 +189,9 @@ public:
       
       //Disk shaped obstacles
       if(glc::sqr(state[0]-center1[0])+glc::sqr(state[1]-center1[1]) <= 4.0 or
-         glc::sqr(state[0]-center2[0])+glc::sqr(state[1]-center2[1]) <= 4.0 )
+        glc::sqr(state[0]-center2[0])+glc::sqr(state[1]-center2[1]) <= 4.0 )
       {
-           return false;
+        return false;
       }
     }
     return true;
@@ -183,22 +235,20 @@ int main()
   //Create a heuristic for the current goal
   EuclideanHeuristic heuristic(goal_center,sqrt(goal_radius_sqr));
   glc::Planner planner(&obstacles,
-                          &goal,
-                          &dynamic_model,
-                          &heuristic,
-                          &performance_objective,
-                          alg_params,
-                          controls.readInputs());
-  
-  //Run the planner and print solution
+                       &goal,
+                       &dynamic_model,
+                       &heuristic,
+                       &performance_objective,
+                       alg_params,
+                       controls.readInputs());
   glc::PlannerOutput out;
   planner.plan(out);
-  if(out.solution_found){
-    std::vector<std::shared_ptr<glc::Node>> path = planner.pathToRoot(true);
-    std::shared_ptr<glc::InterpolatingPolynomial> solution = planner.recoverTraj( path );
-    solution->printSpline(20, "Solution");
-    glc::trajectoryToFile("nonholonomic_path_demo.txt","./",solution,500);
-  }
-    glc::nodesToFile("nonholonomic_path_demo_nodes.txt","./",planner.domain_labels);
-  return 0;
+  
+  std::vector<std::shared_ptr<glc::Node>> path = planner.pathToRoot(true);
+  std::shared_ptr<glc::InterpolatingPolynomial> solution = planner.recoverTraj( path );
+  double t0 = solution->initialTime();
+  double tf = solution->initialTime()+double(solution->numberOfIntervals())*solution->intervalLength();
+  glc::trajectoryToFile("nonholonomic_path_demo.txt","../examples/",solution,500);
+  
+  
 }

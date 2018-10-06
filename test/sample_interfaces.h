@@ -63,22 +63,6 @@ public:
 };
 
 ////////////////////////////////////////////////////////
-////////Problem Specific Admissible Heuristic///////////
-////////////////////////////////////////////////////////
-class EuclideanHeuristic : public glc::Heuristic{
-  double radius;
-  std::valarray<double> goal;
-public:
-  EuclideanHeuristic(std::valarray<double>& _goal,double _radius):radius(_radius){goal=_goal;}
-  double costToGo(const std::valarray<double>& state) const {
-    return std::max(0.0,sqrt(glc::sqr(goal[0]-state[0])+glc::sqr(goal[1]-state[1]))-radius);//offset by goal radius
-  }
-  void setGoal(const std::valarray<double>& goal_){
-    goal = goal_;
-  }
-};
-
-////////////////////////////////////////////////////////
 /////////////////Dynamic Model//////////////////////////
 ////////////////////////////////////////////////////////
 class SingleIntegrator : public glc::RungeKuttaTwo{
@@ -112,6 +96,81 @@ public:
   }
 };
 
+
+class CarControlInputs: public glc::Inputs{
+public:
+  //uniformly spaced points on a circle
+  CarControlInputs(int num_steering_angles){
+    //Make all pairs (forward_speed,steering_angle)
+    std::valarray<double> car_speeds({1.0});//Pure path planning
+    std::valarray<double> steering_angles = glc::linearSpace(-0.0625*M_PI,0.0625*M_PI,num_steering_angles);
+    std::valarray<double> control_input(2);
+    for(double& vel : car_speeds){
+      for(double& ang : steering_angles ){
+        control_input[0]=vel;
+        control_input[1]=ang;
+        addInputSample(control_input);
+      }
+    }
+  }
+};
+
+////////////////////////////////////////////////////////
+///////////////Goal Checking Interface//////////////////
+////////////////////////////////////////////////////////
+class Sphericalgoal: public glc::GoalRegion{
+  double radius_sqr;
+  std::valarray<double> center;
+  int resolution;
+public:
+  Sphericalgoal(double& _goal_radius_sqr, 
+                std::valarray<double>& _goal_center,
+                int _resolution):
+                resolution(_resolution),
+                center(_goal_center),
+                radius_sqr(_goal_radius_sqr){}
+                
+                //Returns true if traj intersects goal and sets t to the first time at which the trajectory is in the goal
+                bool inGoal(const std::shared_ptr<glc::InterpolatingPolynomial>& traj, double& time) override {
+                  time=traj->initialTime();
+                  
+                  double dt=(traj->numberOfIntervals()*traj->intervalLength())/resolution;
+                  for(int i=0;i<resolution;i++){
+                    time+=dt;//don't need to check t0 since it was part of last traj
+                    std::valarray<double> state = traj->at(time);
+                    if(glc::sqr(state[0]-center[0]) + glc::sqr(state[1]-center[1]) < radius_sqr){return true;}
+                  }
+                  return false;
+                }
+};
+
+////////////////////////////////////////////////////////
+////////Problem Specific Admissible Heuristic///////////
+////////////////////////////////////////////////////////
+class EuclideanHeuristic : public glc::Heuristic{
+  double radius;
+  std::valarray<double> goal;
+public:
+  EuclideanHeuristic(std::valarray<double>& _goal,double _radius):radius(_radius),goal(_goal){}
+  double costToGo(const std::valarray<double>& state)const{
+    return std::max(0.0,sqrt(glc::sqr(goal[0]-state[0])+glc::sqr(goal[1]-state[1]))-radius);//offset by goal radius
+  }
+};
+
+////////////////////////////////////////////////////////
+/////////////////Dynamic Model//////////////////////////
+////////////////////////////////////////////////////////
+class CarNonholonomicConstraint : public glc::RungeKuttaTwo {
+public:
+  CarNonholonomicConstraint(const double& _max_time_step): RungeKuttaTwo(1.0,_max_time_step,3) {}
+  void flow(std::valarray<double>& dx, const std::valarray<double>& x, const std::valarray<double>& u) override {
+    dx[0]=u[0]*cos(x[2]);
+    dx[1]=u[0]*sin(x[2]);
+    dx[2]=u[1];
+  }
+  double getLipschitzConstant(){return lipschitz_constant;}
+};
+
 ////////////////////////////////////////////////////////
 /////////////////State Constraints//////////////////////
 ////////////////////////////////////////////////////////
@@ -128,10 +187,17 @@ public:
     for(int i=0;i<resolution;i++){
       t+=dt;//don't need to check t0 since it was part of last traj
       state=traj->at(t);
-      if(glc::normSqr(state-center1)<=4.0 or glc::normSqr(state-center2)<=4.0){return false;}
+      
+      //Disk shaped obstacles
+      if(glc::sqr(state[0]-center1[0])+glc::sqr(state[1]-center1[1]) <= 4.0 or
+        glc::sqr(state[0]-center2[0])+glc::sqr(state[1]-center2[1]) <= 4.0 )
+      {
+        return false;
+      }
     }
     return true;
   }
 };
+
 
 #endif
