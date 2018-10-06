@@ -1,6 +1,6 @@
 /* Copyright (C) Brian Paden (bapaden@mit.edu)
  * Written by Brian Paden
- * Distributed under the MIT license
+ * Distributed under the GPLv3 license
  */
 
 /* This example illustrates how to interface with the glc planner.
@@ -82,9 +82,10 @@ public:
 ////////////////////////////////////////////////////////
 class EuclideanHeuristic : public glc::Heuristic{
   double radius;
+  std::valarray<double> goal;
 public:
-  EuclideanHeuristic(std::valarray<double>& _goal,double _radius):radius(_radius){goal=_goal;}
-  double costToGo(const std::valarray<double>& state){
+  EuclideanHeuristic(std::valarray<double>& _goal,double _radius):radius(_radius),goal(_goal){}
+  double costToGo(const std::valarray<double>& state)const{
     return std::max(0.0,sqrt(glc::sqr(goal[0]-state[0])+glc::sqr(goal[1]-state[1]))-radius);//offset by goal radius
   }
 };
@@ -94,13 +95,13 @@ public:
 ////////////////////////////////////////////////////////
 class CarNonholonomicConstraint : public glc::RungeKuttaTwo {
 public:
-  CarNonholonomicConstraint(const double& _max_time_step): RungeKuttaTwo(_max_time_step,3) {}
+  CarNonholonomicConstraint(const double& _max_time_step): RungeKuttaTwo(1.0,_max_time_step,3) {}
   void flow(std::valarray<double>& dx, const std::valarray<double>& x, const std::valarray<double>& u) override {
     dx[0]=u[0]*cos(x[2]);
     dx[1]=u[0]*sin(x[2]);
     dx[2]=u[1];
   }
-  double getLipschitzConstant(){return 1.0;}
+  double getLipschitzConstant(){return lipschitz_constant;}
 };
 
 ////////////////////////////////////////////////////////
@@ -112,7 +113,7 @@ class ArcLength: public glc::CostFunction
 public:
   ArcLength(int _sample_resolution) : glc::CostFunction(0.0),sample_resolution(double(_sample_resolution)){}
   
-  double cost(const std::shared_ptr<glc::InterpolatingPolynomial>& traj, const std::shared_ptr<glc::InterpolatingPolynomial>& control, double t0, double tf) override {
+  double cost(const std::shared_ptr<glc::InterpolatingPolynomial>& traj, const std::shared_ptr<glc::InterpolatingPolynomial>& control, double t0, double tf) const{
     return traj->numberOfIntervals()*traj->intervalLength();
   }
 };
@@ -181,24 +182,23 @@ int main()
   
   //Create a heuristic for the current goal
   EuclideanHeuristic heuristic(goal_center,sqrt(goal_radius_sqr));
-  glc::GLCPlanner planner(&obstacles,
+  glc::Planner planner(&obstacles,
                           &goal,
                           &dynamic_model,
                           &heuristic,
                           &performance_objective,
                           alg_params,
-                          controls.points);
+                          controls.readInputs());
   
   //Run the planner and print solution
   glc::PlannerOutput out;
   planner.plan(out);
   if(out.solution_found){
-    std::vector<std::shared_ptr<Node>> path = planner.pathToRoot(true);
+    std::vector<std::shared_ptr<glc::Node>> path = planner.pathToRoot(true);
     std::shared_ptr<glc::InterpolatingPolynomial> solution = planner.recoverTraj( path );
-    glc::splineTensor coef(solution->coefficient_array);
-    glc::printSpline( solution , 20, "Solution");
-    glc::trajectoryToFile("shortest_path.txt","../plots/",solution,500);
+    solution->printSpline(20, "Solution");
+    glc::trajectoryToFile("nonholonomic_path_demo.txt","../plots/",solution,500);
   }
-    glc::nodesToFile("shortest_path_nodes.txt","../plots/",planner.domain_labels);
+    glc::nodesToFile("nonholonomic_path_demo_nodes.txt","../plots/",planner.domain_labels);
   return 0;
 }
