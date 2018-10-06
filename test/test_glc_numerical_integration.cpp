@@ -3,9 +3,7 @@
 
 using namespace glc;
 
-/**
- * A concrete implementation of a dynamical system is required to test the numerical integration methods
- */
+//A concrete implementation of a dynamical system is required to test the numerical integration methods 
 class SingleIntegrator : public glc::RungeKuttaTwo{
 public:
   SingleIntegrator(const double& max_time_step_): glc::RungeKuttaTwo(0.0,max_time_step_,2) {}
@@ -13,9 +11,7 @@ public:
   double getLipschitzConstant(){return 0.0;}
 };
 
-/**
- * This tests that the numerical integration integrates the input correctly for the given dynamical system
- */
+//This tests that the numerical integration integrates the input correctly for the given dynamical system
 TEST(GlcNode,Order){
   //Create an instance of a 2D single integrator
   SingleIntegrator holonomic_model(1.0);

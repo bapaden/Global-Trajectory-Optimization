@@ -197,8 +197,8 @@ int main()
     std::vector<std::shared_ptr<glc::Node>> path = planner.pathToRoot(true);
     std::shared_ptr<glc::InterpolatingPolynomial> solution = planner.recoverTraj( path );
     solution->printSpline(20, "Solution");
-    glc::trajectoryToFile("nonholonomic_path_demo.txt","../plots/",solution,500);
+    glc::trajectoryToFile("nonholonomic_path_demo.txt","./",solution,500);
   }
-    glc::nodesToFile("nonholonomic_path_demo_nodes.txt","../plots/",planner.domain_labels);
+    glc::nodesToFile("nonholonomic_path_demo_nodes.txt","./",planner.domain_labels);
   return 0;
 }

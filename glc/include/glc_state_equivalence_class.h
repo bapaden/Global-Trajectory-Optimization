@@ -19,7 +19,6 @@ struct StateEquivalenceClass{
   std::priority_queue<std::shared_ptr<Node>, std::vector<std::shared_ptr<Node>>, NodeMeritOrder> candidates;//candidates for relabeling
   
   StateEquivalenceClass();
-  StateEquivalenceClass(const std::shared_ptr<Node>& _label);
   bool empty();
   //Lexicographical order of integer tuple for sorting stl set of domains
   bool operator<(const StateEquivalenceClass& y)const;

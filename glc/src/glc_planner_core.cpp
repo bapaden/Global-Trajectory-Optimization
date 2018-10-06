@@ -23,9 +23,6 @@ Planner::Planner(Obstacles* _obs,
                  h(_h){
   root_ptr = std::shared_ptr<Node>(new Node(_controls.size(),0, 0,_h->costToGo(params.x0),params.x0,0,nullptr,nullptr,nullptr));
   best = std::shared_ptr<Node>(new Node(0, -1, std::numeric_limits<double>::max(), std::numeric_limits<double>::max(),std::valarray<double>(0),0,nullptr,nullptr,nullptr));
-  StateEquivalenceClass d0(root_ptr);
-  queue.push(root_ptr);
-  domain_labels.insert(d0);
   ////////////*Scaling functions*//////////////
   // 1/R
   expand_time=params.time_scale/(double)params.res;
@@ -38,6 +35,12 @@ Planner::Planner(Obstacles* _obs,
   else{
     eta = pow(params.res,1+dynamics->getLipschitzConstant())/params.partition_scale;
   }
+  
+  StateEquivalenceClass d0;
+  d0.label = root_ptr;
+  d0.coordinate = vecFloor(eta*root_ptr->state);
+  queue.push(root_ptr);
+  domain_labels.insert(d0);
   
   /////////*Print Parameters*/////////////
   std::cout << "\n\n\n\nPre-search summary:\n" << std::endl;

@@ -19,11 +19,6 @@ StateEquivalenceClass::StateEquivalenceClass():label(new Node(0,
                                                              )){
 }
                                                                 
-StateEquivalenceClass::StateEquivalenceClass(const std::shared_ptr<Node>& _label){
-  label = _label;
-  coordinate=vecFloor(label->state);
-}
-
 bool StateEquivalenceClass::empty(){
   return label->cost == std::numeric_limits<double>::max();
 }

@@ -205,8 +205,8 @@ int main()
     std::vector<std::shared_ptr<glc::Node>> path = planner.pathToRoot(true);
     std::shared_ptr<glc::InterpolatingPolynomial> solution = planner.recoverTraj( path );
     solution->printSpline(20, "Solution");
-    glc::trajectoryToFile("shortest_path.txt","../plots/",solution,500);
-    glc::nodesToFile("shortest_path_nodes.txt","../plots/",planner.domain_labels);
+    glc::trajectoryToFile("shortest_path.txt","./",solution,500);
+    glc::nodesToFile("shortest_path_nodes.txt","./",planner.domain_labels);
   }
   return 0;
 }
