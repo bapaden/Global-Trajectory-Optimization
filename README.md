@@ -2,9 +2,13 @@
 
 
 This is a library for solving global trajectory optimization problems given:
-1) A dynamical model for the system (i.e. x'(t)=f(x(t),u(t))
+
+1) A dynamical model for the system (i.e. x'(t)=f(x(t),u(t)) 
+
 2) A cost function of a trajectory x(t) and input signal u(t) to be minimized ( i.e. C(x,u)= Integral g(x(t),u(t)) )
+
 3) A collision detector. That is, if some subset of the state space must be avoided, then function must be provided to determine if a trajectory intersects that region
+
 4) An admissible heuristic to be used in a graph search. Note that the heuristic h(x)=0 is always admissible.
 
 This library may be considered as an alternative to 
@@ -61,18 +65,19 @@ python
 ```
 
 
-
-
 ### API 
 
 Using Cmake, you can link to the installed library as follows:
 
 ```
-...
 find_package(glc)
 include_directories(${GLC_INCLUDE_DIRS})
 
 add_executable(your_awesome_planning_algorithm your_src.cpp)
 target_link_libraries(your_awesome_planning_algorithm glc_planner_core)
-...
+```
+
+In your source code where you instantiate a Planner object include the header
+```
+#include<glc_planner_core.h>
 ```
