@@ -10,8 +10,8 @@ using namespace glc;
  * 3) That the parent attribute in child points to the root node 
  */
 TEST(GlcNode,Order){
-  std::shared_ptr<Node> root = std::shared_ptr<Node>(new Node(5,0,10.0,10.0,std::valarray<double>({0.0,1.0}),1.0,nullptr));
-  std::shared_ptr<Node> child = std::shared_ptr<Node>(new Node(4,1,8.0,14.0,std::valarray<double>({1.0,1.0}),1.0,root));
+  std::shared_ptr<Node> root = std::shared_ptr<Node>(new Node(5,0,10.0,10.0,std::valarray<double>({0.0,1.0}),1.0,nullptr,nullptr,nullptr));
+  std::shared_ptr<Node> child = std::shared_ptr<Node>(new Node(4,1,8.0,14.0,std::valarray<double>({1.0,1.0}),1.0,root,nullptr,nullptr));
   
   NodeMeritOrder comparator;
   

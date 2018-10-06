@@ -3,10 +3,13 @@ include_directories(./include)
 #Level-0 of local dependency graph
 add_library(glc_math src/glc_math.cpp)
 add_library(glc_interpolation src/glc_interpolation.cpp)
-add_library(glc_node src/glc_node.cpp)
 add_library(glc_parameters src/glc_parameters.cpp)
 
 #Level-1 of local dependency graph
+add_library(glc_node src/glc_node.cpp)
+target_link_libraries(glc_node
+                      glc_interpolation)
+                      
 add_library(glc_state_equivalence_class src/glc_state_equivalence_class.cpp)
 target_link_libraries(glc_state_equivalence_class
                       glc_node

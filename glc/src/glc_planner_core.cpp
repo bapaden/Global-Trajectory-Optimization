@@ -21,8 +21,8 @@ Planner::Planner(Obstacles* _obs,
                  goal(_goal), 
                  cf(_cf), 
                  h(_h){
-  root_ptr = std::shared_ptr<Node>(new Node(_controls.size(),0, 0,_h->costToGo(params.x0),params.x0,0,nullptr));
-  best = std::shared_ptr<Node>(new Node(0, -1, std::numeric_limits<double>::max(), std::numeric_limits<double>::max(),std::valarray<double>(0),0,nullptr));
+  root_ptr = std::shared_ptr<Node>(new Node(_controls.size(),0, 0,_h->costToGo(params.x0),params.x0,0,nullptr,nullptr,nullptr));
+  best = std::shared_ptr<Node>(new Node(0, -1, std::numeric_limits<double>::max(), std::numeric_limits<double>::max(),std::valarray<double>(0),0,nullptr,nullptr,nullptr));
   StateEquivalenceClass d0(root_ptr);
   queue.push(root_ptr);
   domain_labels.insert(d0);
@@ -91,8 +91,6 @@ void Planner::expand(){
   
   //A set of domains visited by new nodes made by expand
   std::set<StateEquivalenceClass*> domains_needing_update; 
-  std::map<std::shared_ptr<Node>, std::shared_ptr<InterpolatingPolynomial>> traj_from_parent;
-  std::map<std::shared_ptr<Node>, std::shared_ptr<InterpolatingPolynomial>> control_from_parent;
   
   //Expand top of queue and store arcs in set of domains
   for(int i=0;i<controls.size();i++){
@@ -119,10 +117,10 @@ void Planner::expand(){
                                            h->costToGo(new_traj->at(current_node->time+expand_time)), 
                                            new_traj->at(current_node->time+expand_time), 
                                            current_node->time+expand_time,
-                                           current_node));
-    
-    traj_from_parent[new_arc] = new_traj;
-    control_from_parent[new_arc] = new_control;
+                                           current_node,
+                                           new_traj,
+                                           new_control
+                                          ));
     
     //Create a region for the new trajectory
     std::valarray<double> w = eta * new_arc->state;
@@ -147,7 +145,7 @@ void Planner::expand(){
       //If the top of the candidate queue is cheaper than the label we should coll check it
       if(not compare(current_domain.candidates.top(),current_domain.label)){
         const std::shared_ptr<Node>& best_relabel_candidate = current_domain.candidates.top(); 
-        std::shared_ptr<InterpolatingPolynomial> candidate_traj = traj_from_parent[best_relabel_candidate];
+        std::shared_ptr<InterpolatingPolynomial> candidate_traj = best_relabel_candidate->trajectory_from_parent;//traj_from_parent[best_relabel_candidate];
         if(obs->collisionFree(candidate_traj)){
           addChild(current_node, best_relabel_candidate);
           //Flag vertex if it's in the goal
@@ -155,7 +153,7 @@ void Planner::expand(){
           if( goal->inGoal(candidate_traj,time)){
             best_relabel_candidate->in_goal=true;
             best_relabel_candidate->cost = best_relabel_candidate->parent->cost + cf->cost(candidate_traj,
-                                                                                           control_from_parent[best_relabel_candidate],
+                                                                                           best_relabel_candidate->control_from_parent,
                                                                                            candidate_traj->initialTime(),
                                                                                            time);
           }

@@ -13,7 +13,10 @@ StateEquivalenceClass::StateEquivalenceClass():label(new Node(0,
                                                               std::numeric_limits<double>::max(),
                                                               std::valarray<double>(0),
                                                               0,
-                                                              nullptr)){
+                                                              nullptr,
+                                                              nullptr,
+                                                              nullptr
+                                                             )){
 }
                                                                 
 StateEquivalenceClass::StateEquivalenceClass(const std::shared_ptr<Node>& _label){

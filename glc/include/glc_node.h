@@ -14,6 +14,8 @@
 #include <valarray>
 #include <algorithm> 
 
+#include <glc_interpolation.h>
+
 namespace glc{
   
   /**
@@ -31,6 +33,10 @@ namespace glc{
     
     //! \brief The pointer to this node's parent
     std::shared_ptr<Node> parent;
+    //! \brief The trajectory from the parent node to this node
+    std::shared_ptr<InterpolatingPolynomial> trajectory_from_parent;
+    //! \brief The control signal producing the trajectory from the parent node to this node
+    std::shared_ptr<InterpolatingPolynomial> control_from_parent;
     //! \brief An array of pointers to this node's children
     std::vector< std::shared_ptr<Node> > children;
     //! \brief The state or configuration associated with this node
@@ -58,14 +64,15 @@ namespace glc{
      * \param[in] time_ is the duration of the trajectory from the root to this node in the search tree
      * \param[in] parent_ is a pointer to the parent of this Node
      */
-    Node(int card_omega_, 
-         int control_index_, 
-         double cost_, 
-         double cost_to_go_, 
-         const std::valarray<double>& state_, 
-         double time_,
-         const std::shared_ptr<Node> parent_
-    );
+    Node(int _card_omega, 
+               int _control_index, 
+               double _cost, 
+               double _cost_to_go, 
+               const std::valarray<double>& _state, 
+               double _time,
+               const std::shared_ptr<Node> _parent,
+               const std::shared_ptr<InterpolatingPolynomial>& _trajectory_from_parent,
+               const std::shared_ptr<InterpolatingPolynomial>& _control_from_parent);
   };
   
   /**
