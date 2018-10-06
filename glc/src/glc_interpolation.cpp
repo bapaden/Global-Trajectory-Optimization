@@ -34,7 +34,10 @@ namespace glc{
                                                    
                                                    
   void InterpolatingPolynomial::concatenate(const std::shared_ptr<InterpolatingPolynomial>& tail){
-    assert(tail->dimension==dimension && tail->degree==degree && tail!=nullptr);
+    assert(tail->dimension==dimension);
+    assert(tail!=nullptr);
+    assert(tail->degree==degree);
+    assert(tail->collocation_interval == collocation_interval);
     coefficient_array.insert(coefficient_array.end(),
                              tail->coefficient_array.begin(),
                              tail->coefficient_array.end());
