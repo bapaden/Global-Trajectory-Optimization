@@ -15,11 +15,13 @@ This library may be considered as an alternative to
 a) Sampling-based planners
 b) Variational trajectory optimization utilizing nonlinear programming techniques
 
-Pros/Cons over sampling-based planners: this method handles differential constraints that arise in nonholonomic planning and planning for complex dynamical systems. The reason is that optimal sampling-based planners (such as RRT*) require a steering subroutine in addition to (1)-(4) above which is non-trivial to provide in general. The downside is that for holonomic planning, such as simple shortest path queries, RRT* and PRM* achieve better performance in comparable implementations.
+### Pros/Cons over sampling-based planners:
+This method handles differential constraints that arise in nonholonomic planning and planning for complex dynamical systems. The reason is that optimal sampling-based planners (such as RRT*) require a steering subroutine in addition to (1)-(4) above which is non-trivial to provide in general. The downside is that for holonomic planning, such as simple shortest path queries, RRT* and PRM* achieve better performance in comparable implementations.
 
-Pros/Cons over variational trajectory optimization: this method is far more robust than nonlinear programming based techniues. It does not require a "good initial guess" and it will not converge to a locally optimal solution. The downside is the complexity of this method is exponential with the state space. Up to 3 dimensional state spaces are dealt with very well. In higher dimensions, some domain knowledge will be required to construct a good heuristic.
+### Pros/Cons over variational trajectory optimization: 
+This method is far more robust than nonlinear programming based techniues. It does not require a "good initial guess" and it will not converge to a locally optimal solution. The downside is the complexity of this method is exponential with the state space. Up to 3 dimensional state spaces are dealt with very well. In higher dimensions, some domain knowledge will be required to construct a good heuristic.
 
-### Documentation
+## Documentation
 
 A technical paper describing the theoretical aspects of the method can be found here:
 
@@ -29,7 +31,7 @@ Documentation of the C++ implementation can be found at the link below or by run
 
 [https://codedocs.xyz/bapaden/Global-Trajectory-Optimization/md_README.html](https://codedocs.xyz/bapaden/Global-Trajectory-Optimization/md_README.html)
 
-### Installation
+## Installation
 
 To install the library after downloading the source code, enter the following terminal commands from the top level directory
 
@@ -50,12 +52,12 @@ sudo apt-get install libgtest-dev
 
 [https://github.com/google/googletest](https://github.com/google/googletest)
 
-### Running the examples
+## Running the examples
 
 Several basic examples demonstrating how to interface with the library can ve found in the examples/ directory. Each example generates data that is saved in the plots/ directory which contains python scripts to generate basic illustrations of the solution. To run the examples:
 
 ```
-cd GlobalTrajectoryOptimization/build/examples/
+cd GlobalTrajectoryOptimization/build/examples
 ./shortest-path-demo
 ./pendulum-swingup-demo
 ./nonholonomic-car-demo
@@ -64,12 +66,12 @@ cd GlobalTrajectoryOptimization/build/examples/
 To view the solutions:
 
 ```
-cd GlobalTrajectoryOptimization/build/examples
+cd GlobalTrajectoryOptimization/examples
 python shortest_path_viewer.py
 ```
 
 
-### API 
+## API 
 
 Using Cmake, you can link to the installed library as follows:
 
@@ -83,7 +85,8 @@ target_link_libraries(your_awesome_planning_algorithm glc_planner_core)
 
 In your source code where you instantiate a Planner object include the header
 ```
-#include<glc_planner_core.h>
+#include<glc/glc_planner_core.h>
 ```
 
 You will have to implement derived classes for the following virtual base classes: (a) DynamicalSystem, (b) CostFunction, (c) Heuristic, (d) GoalRegion, (e) Obstacle. These base classes will need to meet the requirements described in the technical paper as well as the source documentation.
+
