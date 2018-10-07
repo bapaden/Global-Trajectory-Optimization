@@ -26,6 +26,8 @@
  */
 
 #include <glc_planner_core.h>
+
+namespace example{
 ////////////////////////////////////////////////////////
 /////////Discretization of Control Inputs///////////////
 ////////////////////////////////////////////////////////
@@ -156,9 +158,11 @@ public:
     return true;
   }
 };
+}//namespace example
 
 int main() 
 {
+  using namespace example;
   //Motion planning algorithm parameters
   glc::Parameters alg_params;
   alg_params.res=16;

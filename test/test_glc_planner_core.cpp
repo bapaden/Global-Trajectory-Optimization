@@ -6,6 +6,8 @@
 #include <gtest/gtest.h>
 #include "sample_interfaces.h"
 
+using namespace test;
+
 TEST(Planner,TestShortestPathSolution){
   //Motion planning algorithm parameters
   glc::Parameters alg_params;
