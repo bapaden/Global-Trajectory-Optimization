@@ -1,15 +1,15 @@
 # Global Trajectory Optimization via the Generalized Label Correcting Method
 
 
-This is a library for solving global trajectory optimization problems given:
+This is a library for solving global trajectory optimization problems given problem specific derived classes for:
 
-1) A dynamical model for the system (i.e. x'(t)=f(x(t),u(t)) 
+        1) A dynamical model for the system (i.e. x'(t)=f(x(t),u(t)$) 
 
-2) A cost function of a trajectory x(t) and input signal u(t) to be minimized ( i.e. C(x,u)= Integral g(x(t),u(t)) )
+        2) A cost function of a trajectory $x(t)$ and input signal u(t) to be minimized ( i.e. C(x,u)= Integral g(x(t),u(t)) )
 
-3) A collision detector. That is, if some subset of the state space must be avoided, then function must be provided to determine if a trajectory intersects that region
+        3) A collision detector. That is, if some subset of the state space must be avoided, then function must be provided to determine if a trajectory intersects that region
 
-4) An admissible heuristic to be used in a graph search. Note that the heuristic h(x)=0 is always admissible.
+        4) An admissible heuristic to be used in a graph search. Note that the heuristic h(x)=0 is always admissible.
 
 This library may be considered as an alternative to 
 a) Sampling-based planners
@@ -21,7 +21,11 @@ Pros/Cons over variational trajectory optimization: this method is far more robu
 
 ### Documentation
 
-See the included paper from the Workshop on the Algorithmic Foundations of Robotics (2016) for the theoretical analysis.  Documentation of the C++ implementation can be found here:
+A technical paper describing the theoretical aspects of the method can be found here:
+
+[https://arxiv.org/abs/1607.06966](https://arxiv.org/abs/1607.06966)
+
+Documentation of the C++ implementation can be found at the link below or by running doxygen from the top level directory:
 
 [https://codedocs.xyz/bapaden/Global-Trajectory-Optimization/md_README.html](https://codedocs.xyz/bapaden/Global-Trajectory-Optimization/md_README.html)
 
@@ -60,8 +64,8 @@ cd GlobalTrajectoryOptimization/build/examples/
 To view the solutions:
 
 ```
-cd GlobalTrajectoryOptimization/plots/
-python 
+cd GlobalTrajectoryOptimization/build/examples
+python shortest_path_viewer.py
 ```
 
 
@@ -81,3 +85,5 @@ In your source code where you instantiate a Planner object include the header
 ```
 #include<glc_planner_core.h>
 ```
+
+You will have to implement derived classes for the following virtual base classes: (a) DynamicalSystem, (b) CostFunction, (c) Heuristic, (d) GoalRegion, (e) Obstacle. These base classes will need to meet the requirements described in the technical paper as well as the source documentation.
