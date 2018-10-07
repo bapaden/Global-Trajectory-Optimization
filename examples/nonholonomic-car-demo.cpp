@@ -241,14 +241,15 @@ int main()
                        &performance_objective,
                        alg_params,
                        controls.readInputs());
+  //Run the planner and print solution
   glc::PlannerOutput out;
   planner.plan(out);
-  
-  std::vector<std::shared_ptr<glc::Node>> path = planner.pathToRoot(true);
-  std::shared_ptr<glc::InterpolatingPolynomial> solution = planner.recoverTraj( path );
-  double t0 = solution->initialTime();
-  double tf = solution->initialTime()+double(solution->numberOfIntervals())*solution->intervalLength();
-  glc::trajectoryToFile("nonholonomic_path_demo.txt","../examples/",solution,500);
-  
-  
+  if(out.solution_found){
+    std::vector<std::shared_ptr<glc::Node>> path = planner.pathToRoot(true);
+    std::shared_ptr<glc::InterpolatingPolynomial> solution = planner.recoverTraj( path );
+    solution->printSpline(20, "Solution");
+    glc::trajectoryToFile("nonholonomic_car_demo.txt","../../examples/",solution,500);
+    glc::nodesToFile("nonholonomic_car_demo_nodes.txt","../../examples/",planner.partition_labels);
+  }
+  return 0;
 }

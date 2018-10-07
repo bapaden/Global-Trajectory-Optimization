@@ -6,7 +6,7 @@
 #ifndef GLC_SAMPLE_INTERFACE_H
 #define GLC_SAMPLE_INTERFACE_H
 
-#include <glc/glc_planner_core.h>
+#include <glc_planner_core.h>
 
 ////////////////////////////////////////////////////////
 /////////Discretization of Control Inputs///////////////
