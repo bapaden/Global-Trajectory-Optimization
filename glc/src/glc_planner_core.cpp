@@ -60,22 +60,31 @@ void Planner::addChild(std::shared_ptr<Node> parent, std::shared_ptr<Node> child
 }
                    
 void Planner::expand(){
+  //Increment the iteration count
   iter++;
+  //If the queue is empty then the problem is not feasible at the current resolution
   if(queue.empty()){
-    std::cout << "---The queue is empty. Resolution too low or no solution.---" << std::endl;
-    live=false;//TODO return this instead
+    std::cout << "---The queue is empty. Resolution too low or no solution at all.---" << std::endl;
+    live=false;
     return;
   }
+  
+  //Pop the top of the queue for expansion
   std::shared_ptr<Node> current_node = queue.top();
   queue.pop();
   
-  //Goal checking
+  //Once a goal node is found we clear the queue and keep the lowest cost node in the goal
   if(current_node->in_goal and current_node->cost < best->cost){
-    run_time = clock() - tstart;  
+    //Note the clock cycles since the planner was queried
+    run_time = clock() - tstart;
+    //Update the pointer to the new lowest cost leaf node in the goal
     best=current_node;
+    //Update the upper bound on the cost of an optimal solution
     UPPER=current_node->cost;
+    //Make sure the found_goal flag is set
     found_goal=true;
-    live=false;//only for best-first search
+    //Set the flag to stop expanding nodes so we can clear the queue
+    live=false;
     std::cout << "\n\nFound goal at iter: " << iter << std::endl;
     std::cout << "     solution cost: " << UPPER << std::endl;
     std::cout << "      running time: " << (float) run_time/ (float) CLOCKS_PER_SEC << std::endl;
@@ -85,6 +94,7 @@ void Planner::expand(){
     std::cout << "     Size of queue: " << queue.size() << std::endl;
   }
   
+  //Stop the algorithm if the search tree reaches the depth or iteration limit
   if(current_node->depth >=depth_limit or iter>params.max_iter)
   {
     std::cout << "---exceeded depth or iteration limit---" << std::endl;
@@ -92,7 +102,7 @@ void Planner::expand(){
     return;
   }
   
-  //A set of domains visited by new nodes made by expand
+  //A set of equivalence classes visited by new nodes made by expand
   std::set<StateEquivalenceClass*> domains_needing_update; 
   
   //Expand top of queue and store arcs in set of domains
