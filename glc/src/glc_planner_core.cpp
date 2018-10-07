@@ -50,6 +50,7 @@ Planner::Planner(Obstacles* _obs,
   std::cout << "   Max iterations: " << params.max_iter << std::endl;
   
   tstart = clock();
+  
 }
   
 void Planner::addChild(std::shared_ptr<Node> parent, std::shared_ptr<Node> child){

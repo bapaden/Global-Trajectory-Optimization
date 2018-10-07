@@ -95,20 +95,19 @@ TEST(Planner,TestSolutionContinuity){
                        controls.readInputs());
   glc::PlannerOutput out;
   planner.plan(out);
-  
   EXPECT_TRUE(out.solution_found);
   
   std::vector<std::shared_ptr<glc::Node>> path = planner.pathToRoot(true);
   std::shared_ptr<glc::InterpolatingPolynomial> solution = planner.recoverTraj( path );
   double t0 = solution->initialTime();
   double tf = solution->initialTime()+double(solution->numberOfIntervals())*solution->intervalLength();
+  
   for(double t=t0;t<tf;t+=(tf-t0)/1000){
     std::valarray<double> x = solution->at(t);
     std::valarray<double> y = solution->at(t+(tf-t0)/1000);
     EXPECT_NEAR(glc::norm2(x-y),(tf-t0)/1000,0.001);
   }
   glc::trajectoryToFile("nonholonomic_path_demo.txt","../examples/",solution,500);
-  
   
 }
 

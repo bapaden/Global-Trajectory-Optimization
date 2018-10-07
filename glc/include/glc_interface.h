@@ -42,7 +42,7 @@ public:
    */
   void addInputSample(std::valarray<double>& input_);
   /**
-   * \brief returns a read-only reference to the set of control inputs
+   * \brief returns a copy of the set of control inputs
    */
   const std::vector<std::valarray<double>>& readInputs() const ;
 };
