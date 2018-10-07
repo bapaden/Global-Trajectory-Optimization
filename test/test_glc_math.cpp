@@ -3,7 +3,7 @@
  * Released under the GNU General Public License v3
  */
 
-#include<glc/glc_math.h>
+#include<glc_math.h>
 #include<gtest/gtest.h>
 
 using namespace glc;
