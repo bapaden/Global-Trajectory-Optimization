@@ -4,7 +4,7 @@ project(glc)
 find_package(GTest REQUIRED)
 enable_testing()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_RELEASE} -std=c++0x -fopenmp -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_DEBUG} -std=c++0x -fopenmp -O3")
 
 # Set variables
 include(${CMAKE_SOURCE_DIR}/cmake/SetEnv.cmake)
