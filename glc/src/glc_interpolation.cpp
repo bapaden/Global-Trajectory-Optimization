@@ -37,7 +37,7 @@ namespace glc{
     assert(tail->dimension==dimension);
     assert(tail!=nullptr);
     assert(tail->degree==degree);
-    assert(tail->collocation_interval == collocation_interval);
+    assert(fabs(tail->collocation_interval - collocation_interval)<1e-4);
     coefficient_array.insert(coefficient_array.end(),
                              tail->coefficient_array.begin(),
                              tail->coefficient_array.end());
