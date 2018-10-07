@@ -1,4 +1,4 @@
-/* Copyright (C) Brian Paden (bapaden@mit.edu) - All Rights Reserved
+/* Copyright (C) Brian Paden (bapaden@mit.edu)
  * Written by Brian Paden
  * Released under the GNU General Public License v3
  */

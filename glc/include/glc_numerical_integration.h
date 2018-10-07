@@ -1,3 +1,8 @@
+/* Copyright (C) Brian Paden (bapaden@mit.edu)
+ * Written by Brian Paden
+ * Released under the GNU General Public License v3
+ */
+
 #ifndef GLC_NUMERICAL_INTEGRATION_H
 #define GLC_NUMERICAL_INTEGRATION_H
 

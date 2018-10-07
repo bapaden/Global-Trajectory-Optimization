@@ -1,3 +1,8 @@
+/* Copyright (C) Brian Paden (bapaden@mit.edu)
+ * Written by Brian Paden
+ * Released under the GNU General Public License v3
+ */
+
 #include<glc_node.h>
 #include<gtest/gtest.h>
 
