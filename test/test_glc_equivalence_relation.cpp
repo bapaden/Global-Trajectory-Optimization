@@ -9,6 +9,8 @@
 using namespace glc;
 
 /**
+ * This checks that the elements of the partition of the state space are ordered 
+ * lexicographically by their multi-dimensional index.
  */
 TEST(GlcEquivalenceRelation,Order){
   
