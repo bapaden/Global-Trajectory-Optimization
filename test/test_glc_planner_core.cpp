@@ -8,6 +8,12 @@
 
 using namespace test;
 
+/**
+ * This test runs a 2D shortest path problem and checks
+ * the solution cost against a gold standard solution
+ * from a point where the implementation is believed
+ * to be correct.
+ */ 
 TEST(Planner,TestShortestPathSolution){
   //Motion planning algorithm parameters
   glc::Parameters alg_params;
@@ -30,7 +36,7 @@ TEST(Planner,TestShortestPathSolution){
   //Create the cost function
   ArcLength performance_objective(4);
   
-  //Create instance of goal region
+  //Create instance of goal region 
   std::valarray<double> xg({10.0,10.0});
   SphericalGoal goal(xg.size(),0.25,4);
   goal.setGoal(xg);
@@ -56,6 +62,12 @@ TEST(Planner,TestShortestPathSolution){
   
 }
 
+/**
+ * This test runs a shortest path problem with a 
+ * nonholonomic constraint. It checks that a solution
+ * is found for this feasible problem, and secondly
+ * that the output curve is continuous.
+ */
 TEST(Planner,TestSolutionContinuity){
   //Motion planning algorithm parameters
   glc::Parameters alg_params;
