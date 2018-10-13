@@ -1,6 +1,6 @@
 /* Copyright (C) Brian Paden (bapaden@mit.edu)
  * Written by Brian Paden
- * Released under the GNU General Public License v3
+ * Released under the MIT License
  */
 
 #include <glc_interface.h>
