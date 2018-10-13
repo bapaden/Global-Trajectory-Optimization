@@ -127,8 +127,6 @@ namespace glc{
     int iter=0;
     //! \brief A counter for the number of clock cycles used in a query
     clock_t run_time, tstart;
-    //! \brief An upper bound on the optimal cost that is reduced as improving solutions are found
-    double UPPER=std::numeric_limits<double>::max();
   public:
     /**
      * \brief An ordered set of equivalence classes that have been reached by a trajectory from the initial state

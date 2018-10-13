@@ -75,25 +75,27 @@ void Planner::expand(){
   queue.pop();
   
   //Once a goal node is found we clear the queue and keep the lowest cost node in the goal
-  double goal_time;
-  if(found_goal and current_node->cost < best->cost and goal->inGoal(current_node->trajectory_from_parent, goal_time)){
-    //Note the clock cycles since the planner was queried
-    run_time = clock() - tstart;
-    //Update the pointer to the new lowest cost leaf node in the goal
-    best=current_node;
-    //Update the upper bound on the cost of an optimal solution
-    UPPER=current_node->cost;
-    //Make sure the found_goal flag is set
-//     found_goal=true;
-    //Set the flag to stop expanding nodes so we can clear the queue
-    live=false;
-    std::cout << "\n\nFound goal at iter: " << iter << std::endl;
-    std::cout << "     solution cost: " << UPPER << std::endl;
-    std::cout << "      running time: " << (float) run_time/ (float) CLOCKS_PER_SEC << std::endl;
-    std::cout << "  Simulation count: " << dynamics->sim_counter << std::endl;
-    std::cout << "  Collision checks: " << obs->collision_counter << std::endl;
-    std::cout << "       Size of set: " << partition_labels.size() << std::endl;
-    std::cout << "     Size of queue: " << queue.size() << std::endl;
+  if(found_goal){
+    double goal_time;
+    if(goal->inGoal(current_node->trajectory_from_parent, goal_time)){
+      double cost = current_node->parent->cost + 
+                    cf->cost(current_node->trajectory_from_parent,
+                             current_node->control_from_parent,
+                             current_node->trajectory_from_parent->initialTime(),
+                             goal_time);
+      if(cost<best->cost){
+        best = current_node;
+        run_time = clock() - tstart;
+        live=false;
+        std::cout << "\n\nFound goal at iter: " << iter << std::endl;
+        std::cout << "     solution cost: " << best->cost << std::endl;
+        std::cout << "      running time: " << (float) run_time/ (float) CLOCKS_PER_SEC << std::endl;
+        std::cout << "  Simulation count: " << dynamics->sim_counter << std::endl;
+        std::cout << "  Collision checks: " << obs->collision_counter << std::endl;
+        std::cout << "       Size of set: " << partition_labels.size() << std::endl;
+        std::cout << "     Size of queue: " << queue.size() << std::endl;
+      }
+    }
   }
   
   //Stop the algorithm if the search tree reaches the depth or iteration limit
@@ -218,7 +220,7 @@ void Planner::plan(){
 
 void Planner::plan(PlannerOutput& out){
   Planner::plan();
-  out.cost=UPPER;
+  out.cost=best->cost;
   out.time=(float) run_time/ (float) CLOCKS_PER_SEC; 
   out.solution_found=found_goal;//TODO change to found_goal
   return;
@@ -226,7 +228,7 @@ void Planner::plan(PlannerOutput& out){
 
 //get the std::shared_ptr<Node> path to the root with the order specified by foward
 std::vector<std::shared_ptr<const Node>> Planner::pathToRoot(bool forward){
-  if(found_goal==false){//this function doesn't work if the planner doesn't have a solution
+  if(found_goal==false){
     std::vector<std::shared_ptr<const Node>> empty_vector;
     return empty_vector;
   }
@@ -237,13 +239,7 @@ std::vector<std::shared_ptr<const Node>> Planner::pathToRoot(bool forward){
     currentNode=currentNode->parent;
   }
   path.push_back(currentNode);
-  
   if(forward){std::reverse(path.begin(),path.end());}
-  
-  for(auto& n : path){
-    std::cout << "Node: " << n->state[0] << "," << n->state[1] << std::endl;
-  }
-  
   return path;
 }
  
