@@ -9,8 +9,8 @@
 #include <fstream>
 #include <set>
 
-#include <glc_state_equivalence_class.h>
-#include <glc_interpolation.h>
+#include "glc_state_equivalence_class.h"
+#include "glc_interpolation.h"
 
 namespace glc{
   

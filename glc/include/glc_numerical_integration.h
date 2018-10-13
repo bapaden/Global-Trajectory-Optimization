@@ -6,8 +6,8 @@
 #ifndef GLC_NUMERICAL_INTEGRATION_H
 #define GLC_NUMERICAL_INTEGRATION_H
 
-#include <glc_interface.h>
-#include <glc_interpolation.h>
+#include "glc_interface.h"
+#include "glc_interpolation.h"
 
 namespace glc{
 

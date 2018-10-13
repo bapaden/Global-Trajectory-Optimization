@@ -1,6 +1,6 @@
 /* Copyright (C) Brian Paden (bapaden@mit.edu)
  * Written by Brian Paden
- * Released under the GNU General Public License v3
+ * Released under the MIT License
  */
 
 #ifndef GLC_INTERFACE_H
@@ -10,7 +10,7 @@
 #include<vector>
 
 //Local libraries
-#include <glc_interpolation.h>
+#include "glc_interpolation.h"
 
 namespace glc{
 

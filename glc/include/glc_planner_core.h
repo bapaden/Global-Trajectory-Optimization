@@ -16,17 +16,17 @@
 #include <map>
 
 //internal linking to dependent libs
-#include <glc_interface.h>
-#include <glc_interpolation.h>
-#include <glc_numerical_integration.h>
-#include <glc_state_equivalence_class.h>
-#include <glc_node.h>
-#include <glc_parameters.h>
-#include <glc_logging.h>
-#include <glc_math.h>
+#include "glc_interface.h"
+#include "glc_interpolation.h"
+#include "glc_numerical_integration.h"
+#include "glc_state_equivalence_class.h"
+#include "glc_node.h"
+#include "glc_parameters.h"
+#include "glc_logging.h"
+#include "glc_math.h"
 
 namespace glc{  
-  
+    
   //! \brief Contains some of the output data
   struct PlannerOutput{
     double cost;

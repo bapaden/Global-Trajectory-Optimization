@@ -14,7 +14,7 @@
 #include <valarray>
 #include <algorithm> 
 
-#include <glc_interpolation.h>
+#include "glc_interpolation.h"
 
 namespace glc{
   

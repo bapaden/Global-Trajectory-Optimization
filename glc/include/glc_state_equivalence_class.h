@@ -8,8 +8,8 @@
 
 #include <limits>
 
-#include <glc_node.h>
-#include <glc_math.h>
+#include "glc_node.h"
+#include "glc_math.h"
 
 namespace glc{
 
