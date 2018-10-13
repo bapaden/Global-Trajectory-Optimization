@@ -42,7 +42,7 @@ Planner::Planner(Obstacles* _obs,
   queue.push(root_ptr);
   partition_labels.insert(d0);
   
-  /////////*Print Parameters*/////////////
+  //Print a summary of the algorithm parameters
   std::cout << "\n\n\n\nPre-search summary:\n" << std::endl;
   std::cout << "      Expand time: " << expand_time << std::endl;
   std::cout << "      Depth limit: " << depth_limit <<  std::endl;
@@ -50,15 +50,7 @@ Planner::Planner(Obstacles* _obs,
   std::cout << "   Max iterations: " << params.max_iter << std::endl;
   
   tstart = clock();
-  
 }
-  
-// void Planner::addChild(const std::shared_ptr<const Node> parent,const std::shared_ptr<const Node> child){
-//     child->parent = parent;
-//     child->depth = parent->depth+1;
-//     child->time = (parent->time+expand_time);
-//     parent->children[child->u_idx] = child;
-// }
                    
 void Planner::expand(){
   //Increment the iteration count
@@ -128,9 +120,6 @@ void Planner::expand(){
     std::shared_ptr<InterpolatingPolynomial> new_control(new InterpolatingPolynomial(linear_interp,expand_time,current_node->time,controls[i].size(),2));
     //Forward simulate with new_control to get a cubic spline between collocation points
     dynamics->sim(new_traj, current_node->time, current_node->time+expand_time , current_node->state, new_control);
-    assert(new_traj->initialTime()==current_node->time);
-    assert(new_traj->at(current_node->time)[1]==current_node->state[1]);
-    assert(new_traj->at(current_node->time)[0]==current_node->state[0]);
     std::shared_ptr<const Node> new_arc(new const Node(controls.size(),
                                            i,
                                            cf->cost(new_traj, new_control,current_node->time,current_node->time+expand_time)+current_node->cost, 
@@ -142,14 +131,6 @@ void Planner::expand(){
                                            new_control
                                           ));
 
-    assert(new_traj->at(current_node->time+expand_time)[0]==new_arc->state[0]);
-    assert(new_traj->at(current_node->time+expand_time)[1]==new_arc->state[1]);
-    assert(new_arc->trajectory_from_parent->at(current_node->time)[0]==current_node->state[0]);
-    assert(new_arc->trajectory_from_parent->at(current_node->time)[1]==current_node->state[1]);
-//     std::cout << "top state: " << new_arc->parent->state[0] << "," << new_arc->parent->state[1] << " traj_0: " <<  new_arc->trajectory_from_parent->at(new_arc->parent->time)[0] << "," << new_arc->trajectory_from_parent->at(new_arc->parent->time)[1] << std::endl;
-    assert(new_arc->parent->state[0]==new_arc->trajectory_from_parent->at(new_arc->parent->time)[0]);
-    
-    
     //Create a region for the new trajectory
     std::valarray<double> w = inverse_cubicle_side_length * new_arc->state;
     StateEquivalenceClass d_new;
@@ -172,29 +153,14 @@ void Planner::expand(){
     {
       //If the top of the candidate queue is cheaper than the label we should coll check it
       if(not compare(current_domain.candidates.top(),current_domain.label)){
-//         std::cout << "relabel " << std::endl;
         std::shared_ptr<const Node> best_relabel_candidate = current_domain.candidates.top(); 
         std::shared_ptr<InterpolatingPolynomial> candidate_traj = best_relabel_candidate->trajectory_from_parent;//traj_from_parent[best_relabel_candidate];
         if(obs->collisionFree(candidate_traj)){
-//           addChild(current_node, best_relabel_candidate);
           //Flag vertex if it's in the goal
           double time;
           if( goal->inGoal(candidate_traj,time)){
             found_goal = true;
-//             best_relabel_candidate->in_goal=true;
-//             best_relabel_candidate->cost = best_relabel_candidate->parent->cost + cf->cost(candidate_traj,
-//                                                                                            best_relabel_candidate->control_from_parent,
-//                                                                                            candidate_traj->initialTime(),
-//                                                                                            time);
           }
-          
-//           std::cout << "state: " << best_relabel_candidate->parent->state[0] << "," << best_relabel_candidate->parent->state[1] << " traj_0: " <<  best_relabel_candidate->trajectory_from_parent->at(best_relabel_candidate->parent->time)[0] << "," << best_relabel_candidate->trajectory_from_parent->at(best_relabel_candidate->parent->time)[1] << std::endl;
-          assert(best_relabel_candidate->parent->state[0]==best_relabel_candidate->trajectory_from_parent->at(best_relabel_candidate->parent->time)[0]);
-          assert(best_relabel_candidate->parent->state[1]==best_relabel_candidate->trajectory_from_parent->at(best_relabel_candidate->parent->time)[1]);
-          assert(best_relabel_candidate->state[0]==best_relabel_candidate->trajectory_from_parent->at(best_relabel_candidate->time)[0]);
-          assert(best_relabel_candidate->state[1]==best_relabel_candidate->trajectory_from_parent->at(best_relabel_candidate->time)[1]);
-          
-          
           queue.push(best_relabel_candidate);//anything coll free at this point goes to queue
           if(!found_best){
             found_best = true;
@@ -250,30 +216,6 @@ std::vector<std::shared_ptr<const Node>> Planner::pathToRoot(bool forward){
    for(int i=2;i<path.size();i++){
      opt_sol->concatenate(path[i]->trajectory_from_parent);
   }
-   //recalculate arcs connecting nodes
-//    for(int i=0; i<path.size()-1;i++){
-     //The interval for the next polynomial segment is [t0,tf]
-//      double t0=path[i]->time;
-//      double tf=t0+expand_time; 
-     //A piecewise linear segment of control based on collocation points stored in std::shared_ptr<Node> path[i]
-//      std::valarray<double> c0;
-//      if(i==0){c0 = controls[path[i+1]->u_idx];}//special case for root vertex - uses control of child
-//      else{c0 = controls[path[i]->u_idx];}
-//      std::valarray<double> c1 = (controls[path[i+1]->u_idx]-c0)/expand_time;
-//      std::vector<std::valarray<double> > segment({c0,c1});
-//      std::vector< std::vector< std::valarray<double> > > linear_interp({segment});
-// //      std::shared_ptr<InterpolatingPolynomial> control_segment(new InterpolatingPolynomial(linear_interp,expand_time,t0,controls[path[i]->u_idx].size(),2));
-//      //Simulate dynamics with input control_segment
-//      std::shared_ptr<InterpolatingPolynomial> traj_segment;
-//      dynamics->sim(traj_segment, t0, tf, path[i]->state,control_segment);
-//      if(i==0){
-//        opt_sol=std::shared_ptr<InterpolatingPolynomial>(new InterpolatingPolynomial(*(traj_segment.get())));//
-//      }
-//      else{
-//        opt_sol->concatenate(traj_segment);
-//      }
-//    }
-   
    return opt_sol;
  } 
  
