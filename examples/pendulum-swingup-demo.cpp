@@ -1,7 +1,7 @@
 #include <glc_planner_core.h>
 
 namespace example{
-
+  
   /**
    * This is an example of a discrete input set for the torque limited
    * pendulum swingup problem where the sampling of inputs from the
@@ -20,13 +20,13 @@ namespace example{
     }
   };
   
-/**
- * The goal region for this example is a small circular domain in 
- * the angle-velocity space for the pendulum centered where 
- * the pendulum is in the inverted position and the velocity is zero.
- * It is required that the goal region have a nonempty interior.
- */  
- class SphericalGoal: public glc::GoalRegion{
+  /**
+   * The goal region for this example is a small circular domain in 
+   * the angle-velocity space for the pendulum centered where 
+   * the pendulum is in the inverted position and the velocity is zero.
+   * It is required that the goal region have a nonempty interior.
+   */  
+  class SphericalGoal: public glc::GoalRegion{
     double goal_radius, goal_radius_sqr;
     std::valarray<double> error;
     std::valarray<double> x_g;
@@ -110,10 +110,15 @@ namespace example{
   /**
    * This is an unconstrained free space all states are collision free
    */
-  class UnconstrainedSpace: public glc::Obstacles{
+  class PendulumStateSpace: public glc::Obstacles{
   public:        
-    UnconstrainedSpace(int _resolution){}
-    bool collisionFree(const std::shared_ptr<glc::InterpolatingPolynomial>& traj) override {return true;}
+    PendulumStateSpace(int _resolution){}
+    bool collisionFree(const std::shared_ptr<glc::InterpolatingPolynomial>& traj) override {
+      if(fabs(traj->at(traj->initialTime())[0])>3.2 or fabs(traj->at(traj->initialTime())[1])>3.2){
+        return false;
+      }
+      return true;
+    }
   };
 }//namespace example
 
@@ -122,14 +127,14 @@ int main()
   using namespace example;
   //Motion planning algorithm parameters
   glc::Parameters alg_params;
-  alg_params.res=15;
+  alg_params.res=5;
   alg_params.control_dim = 1;
   alg_params.state_dim = 2;
   alg_params.depth_scale = 100;
   alg_params.dt_max = 5.0;
   alg_params.max_iter = 50000;
-  alg_params.time_scale = 20;
-  alg_params.partition_scale = 30;
+  alg_params.time_scale = 7;
+  alg_params.partition_scale = 2.5;
   alg_params.x0 = std::valarray<double>({0.0,0.0});
   
   //Create a dynamic model
@@ -143,14 +148,16 @@ int main()
   
   //Create instance of goal region
   std::valarray<double> xg({M_PI,0.0});
-  SphericalGoal goal(xg.size(),0.25,4);
+  SphericalGoal goal(xg.size(),0.25,6);
   goal.setGoal(xg);
   
-  //Create the obstacles
-  UnconstrainedSpace obstacles(4);
+  //Create the obstacles. 
+  PendulumStateSpace obstacles(4);
   
   //Create a heuristic for the current goal
   ZeroHeuristic heuristic;
+  
+  //Construct the planner
   glc::Planner planner(&obstacles,
                        &goal,
                        &dynamic_model,
@@ -165,10 +172,9 @@ int main()
   if(out.solution_found){
     std::vector<std::shared_ptr<const glc::Node>> path = planner.pathToRoot(true);
     std::shared_ptr<glc::InterpolatingPolynomial> solution = planner.recoverTraj( path );
-//     solution->printSpline(20, "Solution");
     solution->printData();
     glc::trajectoryToFile("pendulum_swingup_demo.txt","./",solution,500);
-    glc::nodesToFile("pendulum_swingup_demo_nodes.txt","./",planner.partition_labels);
   }
+  glc::nodesToFile("pendulum_swingup_demo_nodes.txt","./",planner.partition_labels);
   return 0;
 }
