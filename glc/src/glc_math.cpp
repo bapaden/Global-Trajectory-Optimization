@@ -31,7 +31,7 @@ double dot(const std::valarray<double>& x,const std::valarray<double>& y){
 double norm2(const std::valarray<double>& x){
   double norm=0;
   for(int i=0; i<x.size(); i++){
-    norm=norm+sqr(x[i]);
+    norm+=sqr(x[i]);
   }
   return std::sqrt(norm);
 }
@@ -39,7 +39,7 @@ double norm2(const std::valarray<double>& x){
 double normSqr(const std::valarray<double>& x){
   double norm=0;
   for(int i=0; i<x.size(); i++){
-    norm=norm+sqr(x[i]);
+    norm+=sqr(x[i]);
   }
   return norm;
 }

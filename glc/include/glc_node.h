@@ -30,15 +30,14 @@ namespace glc{
    * cost-to-go which is used in the A*-like search. 
    */
   struct Node{
-    
     //! \brief The pointer to this node's parent
-    std::shared_ptr<Node> parent;
+    std::shared_ptr<const Node> parent;
     //! \brief The trajectory from the parent node to this node
     std::shared_ptr<InterpolatingPolynomial> trajectory_from_parent;
     //! \brief The control signal producing the trajectory from the parent node to this node
     std::shared_ptr<InterpolatingPolynomial> control_from_parent;
     //! \brief An array of pointers to this node's children
-    std::vector< std::shared_ptr<Node> > children;
+//     std::vector< std::shared_ptr<const Node> > children;
     //! \brief The state or configuration associated with this node
     std::valarray<double> state;
     //! \brief The duration of a trajectory from the root of the search tree to the state of this node
@@ -70,7 +69,7 @@ namespace glc{
                double _cost_to_go, 
                const std::valarray<double>& _state, 
                double _time,
-               const std::shared_ptr<Node> _parent,
+               const std::shared_ptr<const Node> _parent,
                const std::shared_ptr<InterpolatingPolynomial>& _trajectory_from_parent,
                const std::shared_ptr<InterpolatingPolynomial>& _control_from_parent);
   };
@@ -88,7 +87,7 @@ namespace glc{
      * \param[in] node2 is the right element to be checked for membership in the relation
      * \returns true if the merit of node1 is less than the merit of node2 and false otherwise.
      */ 
-    bool operator()(const std::shared_ptr<Node>& node1, const std::shared_ptr<Node>& node2);
+    bool operator()(const std::shared_ptr<const Node>& node1, const std::shared_ptr<const Node>& node2);
   };
   
 }//namespace glc

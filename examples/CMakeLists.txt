@@ -7,6 +7,5 @@ target_link_libraries(shortest-path-demo glc_planner_core glc_logging)
 add_executable(nonholonomic-car-demo nonholonomic-car-demo.cpp)
 target_link_libraries(nonholonomic-car-demo glc_planner_core glc_logging)
 
-
-# install(TARGETS shortest-path-demo RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin)
-
+add_executable(pendulum-swingup-demo pendulum-swingup-demo.cpp)
+target_link_libraries(pendulum-swingup-demo glc_planner_core glc_logging)

@@ -43,9 +43,9 @@ namespace glc{
    */
   class Planner{
     //! \brief A leaf node in the goal region with minimum cost from the root
-    std::shared_ptr<Node> best;
+    std::shared_ptr<const Node> best;
     //! \brief The root of the search tree
-    std::shared_ptr<Node> root_ptr;
+    std::shared_ptr<const Node> root_ptr;
     //! \brief A raw pointer to the dynamical system for the problem
     DynamicalSystem* dynamics;
     //! \brief A raw pointer to the goal region for the problem
@@ -64,7 +64,7 @@ namespace glc{
      * The queue is ordered by the cost plus the estimated cost to go 
      * determined by the admissible and consistent heuristic.
      */ 
-    std::priority_queue<std::shared_ptr<Node>,std::vector<std::shared_ptr<Node>>,NodeMeritOrder> queue;
+    std::priority_queue<std::shared_ptr<const Node>,std::vector<std::shared_ptr<const Node>>,NodeMeritOrder> queue;
     
     /**
      * \brief A constant factor multiplying the depth limit of the search tree
@@ -158,18 +158,18 @@ namespace glc{
      * \param[in] child is a node that will be pointed to as a child node of parent
      * \param[out] parent is a node modified to have child as a child node
      */
-    void addChild(std::shared_ptr<Node> parent, std::shared_ptr<Node> child);
+//     void addChild(std::shared_ptr<const Node> parent, std::shared_ptr<const Node> child);
     /**
      * \brief This method returns the sequence of nodes from the lowest cost node in the goal back to the root via edge relations stored in each node
      * \param[in] forward is a flag to indicate if the nodes should be ordered from root to leaf (foward=true) or from leaf to root (forward=false)
      */
-    std::vector<std::shared_ptr<Node>> pathToRoot(bool forward=false);
+    std::vector<std::shared_ptr<const Node>> pathToRoot(bool forward=false);
     /**
      * \brief Constructs the trajectory from the root to the leaf node in the goal
      * \param[in] path is the sequence of nodes from root to leaf connected by edge relations
      * \returns a pointer to a trajectory object representing the solution trajectory
      */
-    std::shared_ptr<InterpolatingPolynomial> recoverTraj(const std::vector<std::shared_ptr<Node>>& path);
+    std::shared_ptr<InterpolatingPolynomial> recoverTraj(const std::vector<std::shared_ptr<const Node>>& path);
     
     /**
      * \brief The core iteration of the algorithm that pops the top of the queue and forward integrates the dynamics with each of the controls

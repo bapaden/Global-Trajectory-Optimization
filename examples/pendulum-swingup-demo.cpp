@@ -12,7 +12,8 @@ namespace example{
   public:
     PendulumTorque(int resolution){
       std::valarray<double> u(1);
-      for(double torque=-0.2;torque<=0.2;torque+=0.4/resolution){
+      double max_torque=0.1;
+      for(double torque=-max_torque;torque<=max_torque;torque+=2.0*max_torque/resolution){
         u[0]=torque;
         addInputSample(u);
       }
@@ -37,15 +38,14 @@ namespace example{
                   x_g(_state_dim,0.0), 
                   num_samples(_num_samples),
                   goal_radius(_goal_radius),
-                  error(_state_dim,0.0)
-                  {
+                  error(_state_dim,0.0){
                     goal_radius_sqr=glc::sqr(goal_radius);
                   }
                   bool inGoal(const std::shared_ptr<glc::InterpolatingPolynomial>& traj, double& time) override {
                     time=traj->initialTime();
                     double dt=(traj->numberOfIntervals()*traj->intervalLength())/num_samples;
                     for(int i=0;i<num_samples;i++){
-                      time+=dt;//don't need to check t0 since it was part of last traj
+                      time+=dt;
                       error=x_g-traj->at(time);
                       if(glc::dot(error,error) < goal_radius_sqr){
                         return true;}
@@ -67,15 +67,10 @@ namespace example{
    * zero heuristic for this example
    */
   class ZeroHeuristic : public glc::Heuristic{
-    double radius;
-    std::valarray<double> goal;
   public:
-    ZeroHeuristic(std::valarray<double>& _goal,double _radius):radius(_radius){goal=_goal;}
+    ZeroHeuristic(){}
     double costToGo(const std::valarray<double>& state) const {
       return 0.0;
-    }
-    void setGoal(const std::valarray<double>& goal_){
-      goal = goal_;
     }
   };
   
@@ -102,7 +97,7 @@ namespace example{
   {
     double sample_resolution;
   public:
-    ArcLength(int _sample_resolution) : glc::CostFunction(0.0),sample_resolution(double(_sample_resolution)){}
+    MinTime(int _sample_resolution) : glc::CostFunction(0.0),sample_resolution(double(_sample_resolution)){}
     
     double cost(const std::shared_ptr<glc::InterpolatingPolynomial>& traj, 
                 const std::shared_ptr<glc::InterpolatingPolynomial>& control, 
@@ -112,26 +107,13 @@ namespace example{
                 }
   };
   
-  ////////////////////////////////////////////////////////
-  /////////////////State Constraints//////////////////////
-  ////////////////////////////////////////////////////////
-  class PlanarDemoObstacles: public glc::Obstacles{
-    int resolution;
-    std::valarray<double> center1;
-    std::valarray<double> center2;
+  /**
+   * This is an unconstrained free space all states are collision free
+   */
+  class UnconstrainedSpace: public glc::Obstacles{
   public:        
-    PlanarDemoObstacles(int _resolution):resolution(_resolution),center1({3.0,2.0}),center2({6.0,8.0}){}
-    bool collisionFree(const std::shared_ptr<glc::InterpolatingPolynomial>& traj) override {
-      double t=traj->initialTime();
-      double dt=(traj->numberOfIntervals()*traj->intervalLength())/resolution;
-      std::valarray<double> state;
-      for(int i=0;i<resolution;i++){
-        t+=dt;//don't need to check t0 since it was part of last traj
-        state=traj->at(t);
-        if(glc::normSqr(state-center1)<=4.0 or glc::normSqr(state-center2)<=4.0){return false;}
-      }
-      return true;
-    }
+    UnconstrainedSpace(int _resolution){}
+    bool collisionFree(const std::shared_ptr<glc::InterpolatingPolynomial>& traj) override {return true;}
   };
 }//namespace example
 
@@ -140,35 +122,35 @@ int main()
   using namespace example;
   //Motion planning algorithm parameters
   glc::Parameters alg_params;
-  alg_params.res=16;
-  alg_params.control_dim = 2;
+  alg_params.res=15;
+  alg_params.control_dim = 1;
   alg_params.state_dim = 2;
   alg_params.depth_scale = 100;
   alg_params.dt_max = 5.0;
   alg_params.max_iter = 50000;
   alg_params.time_scale = 20;
-  alg_params.partition_scale = 40;
+  alg_params.partition_scale = 30;
   alg_params.x0 = std::valarray<double>({0.0,0.0});
   
   //Create a dynamic model
-  SingleIntegrator dynamic_model(alg_params.dt_max);
+  InvertedPendulum dynamic_model(alg_params.dt_max);
   
   //Create the control inputs
-  ControlInputs2D controls(alg_params.res);
+  PendulumTorque controls(alg_params.res);
   
   //Create the cost function
-  ArcLength performance_objective(4);
+  MinTime performance_objective(4);
   
   //Create instance of goal region
-  std::valarray<double> xg({10.0,10.0});
+  std::valarray<double> xg({M_PI,0.0});
   SphericalGoal goal(xg.size(),0.25,4);
   goal.setGoal(xg);
   
   //Create the obstacles
-  PlanarDemoObstacles obstacles(4);
+  UnconstrainedSpace obstacles(4);
   
   //Create a heuristic for the current goal
-  EuclideanHeuristic heuristic(xg,goal.getRadius());
+  ZeroHeuristic heuristic;
   glc::Planner planner(&obstacles,
                        &goal,
                        &dynamic_model,
@@ -181,11 +163,12 @@ int main()
   glc::PlannerOutput out;
   planner.plan(out);
   if(out.solution_found){
-    std::vector<std::shared_ptr<glc::Node>> path = planner.pathToRoot(true);
+    std::vector<std::shared_ptr<const glc::Node>> path = planner.pathToRoot(true);
     std::shared_ptr<glc::InterpolatingPolynomial> solution = planner.recoverTraj( path );
-    solution->printSpline(20, "Solution");
-    glc::trajectoryToFile("shortest_path_demo.txt","./",solution,500);
-    glc::nodesToFile("shortest_path_demo_nodes.txt","./",planner.partition_labels);
+//     solution->printSpline(20, "Solution");
+    solution->printData();
+    glc::trajectoryToFile("pendulum_swingup_demo.txt","./",solution,500);
+    glc::nodesToFile("pendulum_swingup_demo_nodes.txt","./",planner.partition_labels);
   }
   return 0;
 }

@@ -124,6 +124,20 @@ public:
    * \param[in] msg is a message that will accompany the output to the terminal
    */
   void printSpline(int num_points, const std::string& msg);
+  
+  void printData(){
+    for(int t_id=0;t_id<numberOfIntervals();t_id++){
+      std::cout << "\n==== interval: " << t_id << "====" << std::endl;
+      for(int mon_id=0;mon_id<4;mon_id++){
+        std::cout << "--- t^" << mon_id << ": ";
+        for(int s_id=0;s_id<2;s_id++){
+          std::cout << coefficient_array[t_id][mon_id][s_id] << ",";
+        }
+      }
+      std::cout<< "end: " << at(initialTime()+double(t_id+1)*intervalLength())[0] << "," << at(initialTime()+double(t_id+1)*intervalLength())[1];
+    }
+    
+  }
 };
 
 }//namespace glc

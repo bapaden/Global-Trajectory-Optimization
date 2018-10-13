@@ -25,13 +25,13 @@ struct StateEquivalenceClass{
   //! \brief Each equivalence class (a hyper-cubicle region) is uniquely identified by an integer tuple
   std::vector<int> coordinate;
   //! \brief An equivalence class has a pointer to a node whose associated state is in the cubicle region
-  std::shared_ptr<Node> label;
+  std::shared_ptr<const Node> label;
   /**
    * \brief A priority queue of potential new nodes that could label the cell
    * 
    * Once relabeled, the subtree rooted at the old label is deleted.
    */ 
-  std::priority_queue<std::shared_ptr<Node>, std::vector<std::shared_ptr<Node>>, NodeMeritOrder> candidates;//candidates for relabeling
+  std::priority_queue<std::shared_ptr<const Node>, std::vector<std::shared_ptr<const Node>>, NodeMeritOrder> candidates;//candidates for relabeling
   
   //! \brief The constructor is the default constructor
   StateEquivalenceClass();
