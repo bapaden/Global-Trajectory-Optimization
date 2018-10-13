@@ -205,6 +205,71 @@ public:
     return true;
   }
 };
+
+/**
+ * Since the pendulum has non-trivial dynamics, we will use the
+ * zero heuristic for this example
+ */
+class ZeroHeuristic : public glc::Heuristic{
+public:
+  ZeroHeuristic(){}
+  double costToGo(const std::valarray<double>& state) const {
+    return 0.0;
+  }
+};
+
+class PendulumTorque : public glc::Inputs{
+public:
+  PendulumTorque(int resolution){
+    std::valarray<double> u(1);
+    for(double torque=-0.2;torque<=0.2;torque+=0.4/resolution){
+      u[0]=torque;
+      addInputSample(u);
+    }
+  }
+};
+
+/**
+ * The dynamic model for this example is a pendulum with
+ * origin defined at the stable equilibrium. The input
+ * is a torque applied at the pivot.
+ */
+class InvertedPendulum : public glc::RungeKuttaTwo{
+public:
+  //For the chosen coordinate system for the dynamic model, the Lipschitz constant is 1.0
+  InvertedPendulum(const double& max_time_step_): glc::RungeKuttaTwo(1.0,max_time_step_,2) {}
+  void flow(std::valarray<double>& dx, const std::valarray<double>& x, const std::valarray<double>& u) override {
+    dx[0] = x[1];
+    dx[1] = u[0] - sin(x[0]);
+  }
+  double getLipschitzConstant(){return lipschitz_constant;}
+};
+
+/**
+ * We will use the minimum time performance objective.
+ */
+class MinTime: public glc::CostFunction 
+{
+  double sample_resolution;
+public:
+  MinTime(int _sample_resolution) : glc::CostFunction(0.0),sample_resolution(double(_sample_resolution)){}
+  
+  double cost(const std::shared_ptr<glc::InterpolatingPolynomial>& traj, 
+              const std::shared_ptr<glc::InterpolatingPolynomial>& control, 
+              double t0, 
+              double tf) const {
+                return tf-t0;
+              }
+};
+
+/**
+ * This is an unconstrained free space all states are collision free
+ */
+class UnconstrainedSpace: public glc::Obstacles{
+public:        
+  UnconstrainedSpace(int _resolution){}
+  bool collisionFree(const std::shared_ptr<glc::InterpolatingPolynomial>& traj) override {return true;}
+};
 }//namespace test
 
 
