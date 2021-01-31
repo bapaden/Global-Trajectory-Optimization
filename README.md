@@ -67,7 +67,7 @@ To view the solutions:
 
 ```
 cd GlobalTrajectoryOptimization/examples
-python shortest_path_viewer.py
+python example_solution_viewer.py
 ```
 
 
