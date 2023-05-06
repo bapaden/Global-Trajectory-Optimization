@@ -59,7 +59,7 @@ TEST(GlcMath,TestNormSqr){
   EXPECT_EQ(norm_square_a,14.);
 
   std::valarray<double> y = {1.,2.,-3.};
-  double norm_square_b = normSqr(x);
+  double norm_square_b = normSqr(y);
   
   EXPECT_EQ(norm_square_b,14.);
 }
