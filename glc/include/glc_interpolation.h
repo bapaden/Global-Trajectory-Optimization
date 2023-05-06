@@ -131,6 +131,7 @@ public:
       for(int mon_id=0;mon_id<4;mon_id++){
         std::cout << "--- t^" << mon_id << ": ";
         for(int s_id=0;s_id<2;s_id++){
+          if (coefficient_array[t_id].size() - 1 < mon_id) continue;
           std::cout << coefficient_array[t_id][mon_id][s_id] << ",";
         }
       }
